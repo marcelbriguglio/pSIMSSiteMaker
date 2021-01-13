@@ -1,0 +1,67 @@
+model:       apsim79
+weather:     /pysims/data/Data/clim/ERA5/
+soils:       /pysims/data/Data/soils
+refdata:     /pysims/data/Data/refdata
+out_file:    apsim.test
+executable:  /Apsim79/Model/Apsim.exe
+outtypes:    .met,.apsim,.out,.json,.txt
+exname_o :    test
+
+ref_year:    2009
+num_years:   1
+scen_years:  1
+scens: 50
+
+delta:       "0.5,0.5"
+tdelta:      "120,120"
+
+num_lats:    360
+num_lons:    720
+lat_zero:    90
+lon_zero:    -180
+irr_flag:    true
+irr_1st:     true
+
+# Variables to extra
+variables:   biomass,yield,st(1),st(2),st(3),st(4),st(5),st(6),st(7),st(8),sws(1),sws(2),sws(3),sws(4),sws(5),sws(6),sws(7),sws(8)
+var_units:   "kg/ha,kg/ha,oC,oC,oC,oC,oC,oC,oC,oC,mm/mm,mm/mm,mm/mm,mm/mm,mm/mm,mm/mm,mm/mm,mm/mm"
+long_names:  "biomass,yield,soilTemperature,soilTemperature,soilTemperature,soilTemperature,soilTemperature,soilTemperature,soilTemperature,soilTemperature,soilWater,soilWater,soilWater,soilWater,soilWater,soilWater,soilWater,soilWater"
+  
+# Campaign translator
+tappcmp:
+   class:         camp2json
+   campaignfile:  Campaign.nc4
+   expfile:       exp_template.json
+   outputfile:    experiment.json
+
+# Input translator
+tappinp:
+    class:         apsim79.jsons2apsim
+    soilfile:      soil.json
+    soiltile:      1.soil.nc4
+    expfile:       experiment.json
+    templatefile:  /pysims/data/pSIMS_Output/APSIM/energyFarm/open_loop/template.apsim
+    outputfile:    Generic.apsim
+    cultivarfile:  /pysims/data/pSIMS_Output/APSIM/energyFarm/Maize-template.xml
+
+# Weather translator
+tappwth:
+   class:      apsim79.psims2met
+   inputfile:  1.clim.nc4
+   variables:  tmin,tmax,srad,prcp,wind
+   outputfile: Generic.met
+
+# Post processing translation
+postprocess:
+    class:     apsim79.out2psims
+    inputfile: Generic paddock.out
+
+tapptilewth:
+    class:     tile_translator
+
+tapptilesoil:
+    class:     tile_translator_soil
+    inputfile: 1.soil.tile.nc4
+
+tappnooutput:
+    class: nooutput2psims
